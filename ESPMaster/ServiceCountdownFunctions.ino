@@ -1,5 +1,6 @@
 //Check if countdown is required and check how long left
-void checkCountdown() {
+bool checkCountdown() {
+  bool didShowText = false;
   //This will check if a day has passed since the last time the countdown was updated
   if (deviceMode == DEVICE_MODE_COUNTDOWN) {
     long countdownInSeconds = atol(countdownToDateUnix.c_str());
@@ -24,6 +25,9 @@ void checkCountdown() {
     if (inputText != daysText) {
       SerialPrintln("Setting Countdown Text to: " + daysText);
       inputText = daysText;
+      didShowText = true;
     }
   }
+  
+  return didShowText;
 }

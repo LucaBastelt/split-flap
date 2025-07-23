@@ -54,7 +54,8 @@ bool removeScheduledMessage(long scheduledDateTimeUnix) {
 }
 
 //Check if scheduled message is due to be shown
-void checkScheduledMessages() {   
+bool checkScheduledMessages() {   
+  bool didShowText = false;
   //Iterate over the current bunch of scheduled messages. If we find one where the current time exceeds when we should show
   //the message, then we need to show that message immediately
   unsigned long currentTimeUnix = timezone.now();
@@ -70,9 +71,11 @@ void checkScheduledMessages() {
         deviceMode = DEVICE_MODE_TEXT;
         inputText = scheduledMessage.Message;
         showText(scheduledMessage.Message);
+        didShowText = true;
       }
       else {
-        showText(scheduledMessage.Message, scheduledMessageDisplayTimeMillis);
+        showText(scheduledMessage.Message, scheduledMessageDisplayTimeSecs);
+        didShowText = true;
       }      
 
       scheduledMessages.remove(scheduledMessageIndex);
@@ -80,6 +83,8 @@ void checkScheduledMessages() {
       break;
     }
   }
+
+  return didShowText;
 }
 
 //Parse JSON scheduled messages into the current known scheduled messages

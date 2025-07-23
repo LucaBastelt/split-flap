@@ -72,6 +72,7 @@ void setup() {
   Serial.println("starting unit");
   Serial.print("I2CAddress: ");
   Serial.println(i2cAddress);
+  digitalWrite (LED_BUILTIN, HIGH); // turns on LED when waking up, for debugging
 #endif
 
   //I2C function assignment
@@ -126,9 +127,9 @@ void loop() {
       #ifdef SERIAL_ENABLE
       Serial.print("Value over serial received: ");
       Serial.print(receivedNumber);
-      Serial.print(" Letter: ");
+      Serial.print(" Letter: '");
       Serial.print(letters[receivedNumber]);
-      Serial.println();
+      Serial.println("'");
       #endif
     */
     //rotate to new letter
@@ -147,8 +148,9 @@ void rotateToLetter(int toLetter) {
     posCurrentLetter = displayedLetter;
     //int amountLetters = sizeof(letters) / sizeof(String);
 #ifdef SERIAL_ENABLE
-    Serial.print("go to letter: ");
-    Serial.println(letters[toLetter]);
+    Serial.print("go to letter: '");
+    Serial.print(letters[toLetter]);
+    Serial.println("'");
 #endif
     //go to letter, but only if available (>-1)
     if (posLetter > -1) { //check if letter exists

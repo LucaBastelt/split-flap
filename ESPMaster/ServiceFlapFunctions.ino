@@ -3,7 +3,7 @@ void showText(String message) {
   showText(message, 0);
 }
 
-void showText(String message, int delayMillis) {  
+void showText(String message, int delaySecs) {  
   if (lastWrittenText != message || alignmentUpdated) { 
     String messageDisplay = message == "" ? "<Blank>" : message;
     String alignmentUpdatedDisplay = alignmentUpdated ? "Yes" : "No";
@@ -39,9 +39,9 @@ void showText(String message, int delayMillis) {
     }  
 
     //If the device wasn't previously in text mode, delay for a short time so can read!
-    if (delayMillis != 0) {
-      SerialPrintln("Pausing for a small duration. Delay: " + String(delayMillis));
-      delay(delayMillis);
+    if (delaySecs != 0) {
+      SerialPrintln("Pausing for a small duration. Delay: " + String(delaySecs));
+      delayNextUpdateUntil = timezone.now() + delaySecs;
     }
 
     //Save what we last did

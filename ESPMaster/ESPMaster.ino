@@ -121,7 +121,7 @@ const char* dateFormat = "d.m.Y"; //Examples: d.m.Y -> 11.09.2021, D M y -> SAT 
 const char* clockFormat = "H:i"; //Examples: H:i -> 21:19, h:ia -> 09:19PM
 
 //How long to show a message for when a scheduled message is shown for
-const int scheduledMessageDisplayTimeMillis = 7500;
+const int scheduledMessageDisplayTimeSecs = 8;
 
 #if WIFI_STATIC_IP == true
 //Static IP address for your device. Try take care to not conflict with something else on your network otherwise
@@ -198,6 +198,7 @@ bool isPendingUnitsReset = false;
 bool isWifiConfigured = false;
 LList<ScheduledMessage> scheduledMessages;
 Timezone timezone; 
+unsigned long delayNextUpdateUntil = 0;
 
 //Create AsyncWebServer object on port 80
 AsyncWebServer webServer(80);
@@ -286,6 +287,25 @@ void setup() {
       String json = getCurrentSettingValues();
       request->send(200, "application/json", json);
       json = String();
+    });
+
+    webServer.on("/remote-message", HTTP_POST, [](AsyncWebServerRequest *request) {
+          String message = "";
+          int params = request->params();
+          for (int paramIndex = 0; paramIndex < params; paramIndex++) {
+            AsyncWebParameter* p = request->getParam(paramIndex);
+            if (p->isPost()) {
+              SerialPrintln(p->name());
+              SerialPrintln(p->value());
+              if(p->name() == "message")
+                message = p->value();
+            }
+          }
+
+          SerialPrintln("Remote message received: " + message);
+          addAndPersistScheduledMessage(message, timezone.now() + 5, false);
+
+          request->send(200, "text/plain", "Remote message accepted");
     });
     
     webServer.on("/health", HTTP_GET, [](AsyncWebServerRequest * request) {
@@ -693,11 +713,14 @@ void loop() {
   
   //Process every second
   unsigned long currentMillis = millis();
-  if (currentMillis - previousMillis >= 1000) {
+  if (currentMillis - previousMillis >= 1000 && delayNextUpdateUntil < timezone.now()) {
     previousMillis = currentMillis;
+    delayNextUpdateUntil = 0;
 
-    checkScheduledMessages();
-    checkCountdown();
+    if (checkScheduledMessages())
+      return;
+    if (checkCountdown())
+      return;
 
     //Mode Selection
     if (deviceMode == DEVICE_MODE_TEXT || deviceMode == DEVICE_MODE_COUNTDOWN) { 
