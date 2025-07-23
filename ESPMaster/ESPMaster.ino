@@ -295,8 +295,6 @@ void setup() {
           for (int paramIndex = 0; paramIndex < params; paramIndex++) {
             AsyncWebParameter* p = request->getParam(paramIndex);
             if (p->isPost()) {
-              SerialPrintln(p->name());
-              SerialPrintln(p->value());
               if(p->name() == "message")
                 message = p->value();
             }
@@ -305,7 +303,7 @@ void setup() {
           SerialPrintln("Remote message received: " + message);
           addAndPersistScheduledMessage(message, timezone.now() + 5, false);
 
-          request->send(200, "text/plain", "Remote message accepted");
+          request->send(200, "text/plain", "Message accepted");
     });
     
     webServer.on("/health", HTTP_GET, [](AsyncWebServerRequest * request) {
